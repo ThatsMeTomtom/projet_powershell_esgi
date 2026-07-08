@@ -1,30 +1,3 @@
-<#
-====================================================================
- 04-New-PartagesEtACL.ps1
- Etape 4/11 : cree l'arborescence disque, les partages reseau et les
- permissions NTFS de base, en s'appuyant sur les groupes crees au
- script 02. A executer AVANT l'import des utilisateurs (script 06)
- puisque les ACL des sous-dossiers "Perso" et "Enseignants" nominatifs
- sont posees a la volee lors de la creation des comptes.
-
- Regles d'acces implementees (cf sujet) :
-   - Z: Direction     -> GG-Direction uniquement
-   - S: Enseignants    -> GG-Enseignants + GG-Direction (acces total au
-                           partage, y compris les dossiers nominatifs des
-                           collegues : c'est la lecture LITTERALE du sujet
-                           "les comptes enseignants peuvent acceder a
-                           l'ensemble des donnees du dossier Enseignants".
-                           Si vous vouliez au contraire des dossiers prives
-                           par enseignant, dites-le moi : il suffit de
-                           resserrer l'ACL par sous-dossier, meme logique
-                           que pour Perso$ ci-dessous)
-   - T: Classes\ClasseX -> GG-Eleves-ClasseX limite a SA classe uniquement
-                           GG-Enseignants + GG-Direction -> toutes les classes
-   - P: Perso\<user>    -> l'utilisateur concerne + Service informatique
-                           uniquement (cf script 06)
-====================================================================
-#>
-
 Import-Module ActiveDirectory
 . "$PSScriptRoot\00-Variables.ps1"
 

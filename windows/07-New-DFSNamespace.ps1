@@ -1,19 +1,3 @@
-<#
-====================================================================
- 07-New-DFSNamespace.ps1
- Etape 7/11 : espace de noms DFS (\\louise-michel.edu\Partages).
-
- Avec un seul serveur de fichiers, DFS n'apporte pas encore de
- redondance (pas de 2e cible = pas de replication DFS-R possible),
- mais il decouple le CHEMIN vu par les clients (\\domaine\Partages\...)
- du SERVEUR physique qui l'heberge. C'est ce qui rend la solution
- evolutive : le jour ou un 2e serveur de fichiers est ajoute, on
- ajoute juste une 2e cible de dossier + la replication DFS-R, sans
- reconfigurer un seul poste client ni changer le script d'ouverture
- de session.
-====================================================================
-#>
-
 . "$PSScriptRoot\00-Variables.ps1"
 
 Write-Host "Installation du role DFS Namespaces ..." -ForegroundColor Cyan

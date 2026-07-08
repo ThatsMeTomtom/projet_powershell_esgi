@@ -1,23 +1,3 @@
-<#
-====================================================================
- LogonScript.ps1
- Deploye automatiquement par la GPO "GPO-ScriptOuverture" (cf script
- 11) sur Direction / Enseignants / Eleves. Ne necessite PAS le module
- ActiveDirectory cote client (pas garanti d'etre installe sur un
- poste) : l'appartenance aux groupes est lue directement depuis le
- jeton Windows de l'utilisateur connecte.
-
- Mappages :
-   P: -> dossier personnel (tout le monde)
-   Z: -> Direction uniquement
-   S: -> Enseignants + Direction
-   T: -> Classes (toutes) pour Enseignants/Direction,
-         uniquement SA classe pour un eleve
-   Imprimante par defaut -> file "Staff" (Direction/Enseignants) ou
-         "Eleves", cf script 08 pour la logique de priorite.
-====================================================================
-#>
-
 $Domain  = "louise-michel.edu"
 $NetBIOS = "LMICHEL"
 $Server  = "SRV-WIN01"

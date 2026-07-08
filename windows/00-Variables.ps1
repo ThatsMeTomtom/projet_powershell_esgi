@@ -1,11 +1,3 @@
-<#
-====================================================================
- 00-Variables.ps1
- Variables communes - Ecole Louise Michel (SNTS - Gresivaudan)
- A dot-sourcer en debut de chaque script :  . .\00-Variables.ps1
-====================================================================
-#>
-
 # --- Identite du domaine ---------------------------------------------------
 $Global:DomainName    = "louise-michel.edu"
 $Global:DomainNetBIOS = "LMICHEL"

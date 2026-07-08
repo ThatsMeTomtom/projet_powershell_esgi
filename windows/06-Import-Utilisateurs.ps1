@@ -1,17 +1,3 @@
-<#
-====================================================================
- 06-Import-Utilisateurs.ps1
- Etape 6/11 : creation en lot des comptes a partir du fichier
- LouiseMichel_Utilisateurs.csv (291 eleves, 15 enseignants,
- 1 compte direction), rangement dans les bonnes UO, ajout aux groupes,
- creation du dossier personnel + ACL, mappage HomeDrive P:, et
- application des horaires de connexion.
-
- Prerequis : scripts 02 (UO/groupes), 03 (politiques mdp) et
- 04 (partages/ACL) deja executes.
-====================================================================
-#>
-
 Import-Module ActiveDirectory
 . "$PSScriptRoot\00-Variables.ps1"
 

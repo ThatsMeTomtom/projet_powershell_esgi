@@ -1,18 +1,3 @@
-<#
-====================================================================
- 99-Deploy-All.ps1
- Enchaine les etapes 02 a 11 dans l'ordre logique "creer -> attribuer".
- A lancer sur SRV-WIN01, apres coup :
-   1. Script 01 execute manuellement (provoque un reboot + reconnexion
-      avec un compte Domain Admins, donc impossible a automatiser dans
-      la meme session)
-   2. Le dossier "data\LouiseMichel_Utilisateurs.csv" present a cote
-      du dossier "windows\" (structure livree telle quelle)
-
- Usage : powershell.exe -ExecutionPolicy Bypass -File .\99-Deploy-All.ps1
-====================================================================
-#>
-
 $ErrorActionPreference = "Stop"
 $scripts = @(
     "02-New-OUsEtGroupes.ps1",

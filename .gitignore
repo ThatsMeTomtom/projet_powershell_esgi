@@ -2,3 +2,21 @@ node_modules/
 *.log
 .vscode/
 .DS_Store
+
+# ======================================================
+# Secrets Ansible - ne jamais committer le vault dechiffre
+# ======================================================
+ansible/vars/vault.yml
+
+# Fichiers generes a l'execution (contiennent des donnees sensibles)
+data/Identifiants_Generes.csv
+
+# Fichiers temporaires Ansible
+*.retry
+
+# VirtualBox
+*.vbox-prev
+
+# Windows
+Thumbs.db
+Desktop.ini

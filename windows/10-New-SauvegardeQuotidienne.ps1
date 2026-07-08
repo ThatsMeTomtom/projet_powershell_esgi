@@ -1,15 +1,3 @@
-<#
-====================================================================
- 10-New-SauvegardeQuotidienne.ps1
- Etape 10/11 : sauvegarde journaliere avec Windows Server Backup.
- Cible : volume D: (Partages + Perso) + etat systeme (annuaire AD,
- SYSVOL, base de registre) -> indispensable sur un controleur de
- domaine, sinon on ne pourrait pas restaurer l'AD en cas de crash.
- Destination : disque E: (a adapter : idealement un disque DEDIE a la
- sauvegarde, different du disque de donnees).
-====================================================================
-#>
-
 . "$PSScriptRoot\00-Variables.ps1"
 
 Write-Host "Installation de la fonctionnalite Windows Server Backup ..." -ForegroundColor Cyan

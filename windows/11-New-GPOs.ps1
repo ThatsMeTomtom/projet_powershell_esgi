@@ -1,25 +1,3 @@
-<#
-====================================================================
- 11-New-GPOs.ps1
- Etape 11/11 (derniere etape "attribution") :
-   A. GPO-Restriction-Eleves    -> pas d'installation de logiciels
-   B. GPO-AccesDistant          -> RDP + WinRM ouverts sur tous les postes
-   C. GPO-ScriptOuverture       -> deploiement de LogonScript.ps1
-                                   (mappage lecteurs + imprimante)
-
- Rappel important sur (A) : la vraie protection contre l'installation
- de logiciels, c'est que les comptes eleves NE SONT JAMAIS ajoutes au
- groupe local Administrateurs (ils sont crees comme utilisateurs
- standards au script 06 - rien de plus a faire pour ca). Ce script
- ajoute une couche defense-en-profondeur scriptable (Windows Installer
- desactive + Panneau de configuration masque). Le verrouillage du
- groupe Administrateurs local via "Groupes restreints" n'a pas de
- cmdlet PowerShell dedie fiable (il faut editer le modele de securite
- GptTmpl.inf de la GPO) : a faire en 2 clics via gpmc.msc si vous
- voulez une ceinture-bretelles totale (indique en bas de script).
-====================================================================
-#>
-
 Import-Module GroupPolicy
 Import-Module NetSecurity
 . "$PSScriptRoot\00-Variables.ps1"

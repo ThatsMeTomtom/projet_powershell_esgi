@@ -1,14 +1,3 @@
-<#
-====================================================================
- 05-New-QuotasFSRM.ps1
- Etape 5/11 : installation de File Server Resource Manager et mise en
- place d'un quota de 1 Go avec alerte a 90% sur chaque dossier
- personnel (P:). Le quota est en "auto-apply" : chaque sous-dossier
- cree dans D:\Perso (donc chaque nouvel utilisateur importe au script
- 06) herite automatiquement du modele, sans intervention manuelle.
-====================================================================
-#>
-
 . "$PSScriptRoot\00-Variables.ps1"
 
 Write-Host "Installation du role File Server Resource Manager ..." -ForegroundColor Cyan

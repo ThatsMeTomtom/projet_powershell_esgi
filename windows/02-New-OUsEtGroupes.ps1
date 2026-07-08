@@ -1,15 +1,3 @@
-<#
-====================================================================
- 02-New-OUsEtGroupes.ps1
- A executer sur SRV-WIN01 apres la promotion en DC (script 01),
- connecte avec un compte "Domain Admins".
-
- Etape 2/11 : structure d'UO, zone DNS inverse, groupes de securite.
- (On cree la structure et les groupes AVANT d'importer qui que ce soit :
- les utilisateurs du script 06 viendront se ranger dedans.)
-====================================================================
-#>
-
 Import-Module ActiveDirectory
 Import-Module DnsServer
 . "$PSScriptRoot\00-Variables.ps1"

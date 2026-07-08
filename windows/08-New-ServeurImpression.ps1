@@ -1,27 +1,3 @@
-<#
-====================================================================
- 08-New-ServeurImpression.ps1
- Etape 8/11 : serveur d'impression.
-
- Principe retenu pour la priorite "Direction/Enseignants d'abord" sur
- UNE seule imprimante physique : on cree DEUX files logiques qui
- pointent vers le MEME port (donc la meme imprimante physique), avec
- une priorite Windows differente (1-99, la plus haute est servie en
- premier en cas de file d'attente). C'est la technique standard cote
- serveur d'impression Windows pour prioriser des groupes d'utilisateurs
- sur un materiel partage, sans acheter une 2e imprimante.
-
-   Impr-Ecole-Staff  (priorite 99) -> Direction + Enseignants
-   Impr-Ecole-Eleves (priorite 1)  -> Eleves
-
- A ADAPTER : IP de l'imprimante et pilote (driver) reels une fois le
- materiel connu. Le pilote choisi ici (Microsoft PCL6 Class Driver)
- est un pilote generique inbox de Windows Server 2022, qui supporte le
- recto-verso ; remplacez-le par le pilote constructeur si besoin de
- fonctionnalites specifiques.
-====================================================================
-#>
-
 . "$PSScriptRoot\00-Variables.ps1"
 
 $PrinterIP     = "10.15.0.30"                          # IP reelle de l'imprimante a renseigner

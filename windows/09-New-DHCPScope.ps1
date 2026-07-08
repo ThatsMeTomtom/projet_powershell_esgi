@@ -1,17 +1,3 @@
-<#
-====================================================================
- 09-New-DHCPScope.ps1
- Etape 9/11 : serveur DHCP Windows, avec une exclusion couvrant 20% du
- pool (10.15.0.100-130) volontairement laissee libre pour le serveur
- DHCP Linux (SRV-LNX01, cf linux/setup-dhcp-failover.sh). C'est un
- "split-scope" manuel a 80/20 : les deux serveurs distribuent des baux
- sur le MEME sous-reseau sans jamais se marcher dessus, ce qui offre
- une redondance DHCP simple entre un serveur Windows et un serveur
- Linux (le vrai "DHCP Failover" de Windows ne fonctionne qu'entre deux
- serveurs Windows, donc inutilisable ici).
-====================================================================
-#>
-
 . "$PSScriptRoot\00-Variables.ps1"
 
 Write-Host "Installation du role DHCP ..." -ForegroundColor Cyan

@@ -1,12 +1,3 @@
-<#
-====================================================================
- 03-New-PasswordPolicies.ps1
- Etape 3/11 : politique de mot de passe du domaine + strategies de mot
- de passe affinees (PSO) par population.
- A executer apres le script 02 (les groupes GG-* doivent exister).
-====================================================================
-#>
-
 Import-Module ActiveDirectory
 . "$PSScriptRoot\00-Variables.ps1"
 
