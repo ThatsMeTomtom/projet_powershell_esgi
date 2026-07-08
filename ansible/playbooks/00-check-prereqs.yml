@@ -1,0 +1,71 @@
+---
+# ====================================================================
+# 00-check-prereqs.yml
+# A lancer depuis WSL2 (Ubuntu). Verifie/installe ce qu'il faut avant
+# de creer quoi que ce soit, et cree le reseau prive hote VirtualBox.
+# ====================================================================
+- name: Verification des prerequis
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../vars/main.yml
+
+  vars:
+    # Chemin de VBoxManage.exe vu depuis WSL (installation par defaut)
+    vboxmanage: "/mnt/c/Program Files/Oracle/VirtualBox/VBoxManage.exe"
+
+  tasks:
+
+    - name: VBoxManage.exe est accessible depuis WSL
+      ansible.builtin.stat:
+        path: "{{ vboxmanage }}"
+      register: vboxmanage_stat
+
+    - name: Echec si VBoxManage introuvable
+      ansible.builtin.fail:
+        msg: >
+          VBoxManage.exe introuvable a {{ vboxmanage }}.
+          Verifiez le chemin d'installation de VirtualBox sur Windows
+          (Programmes) et ajustez la variable 'vboxmanage' si besoin.
+      when: not vboxmanage_stat.stat.exists
+
+    - name: L'ISO Windows existe bien a l'emplacement indique
+      ansible.builtin.stat:
+        path: "{{ windows_iso_path_win | regex_replace('^C:\\\\\\\\', '/mnt/c/') | regex_replace('\\\\\\\\', '/') }}"
+      register: iso_stat
+
+    - name: Echec si l'ISO est introuvable
+      ansible.builtin.fail:
+        msg: >
+          ISO introuvable : {{ windows_iso_path_win }}. Verifiez le chemin
+          dans ansible/vars/main.yml (variable windows_iso_path_win).
+      when: not iso_stat.stat.exists
+
+    - name: genisoimage est installe (pour graver autounattend.xml sur un mini ISO)
+      become: true
+      ansible.builtin.apt:
+        name: genisoimage
+        state: present
+        update_cache: true
+
+    - name: Reseaux prives hote existants
+      ansible.builtin.command: "\"{{ vboxmanage }}\" list hostonlyifs"
+      register: hostonlyifs
+      changed_when: false
+
+    - name: Creation du reseau prive hote {{ hostonly_network_name }} si absent
+      ansible.builtin.command: "\"{{ vboxmanage }}\" hostonlyif create"
+      when: hostonly_network_name not in hostonlyifs.stdout
+      register: created_hostonly
+      changed_when: true
+
+    - name: Configuration IP du reseau prive hote ({{ hostonly_host_ip }})
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" hostonlyif ipconfig {{ hostonly_network_name }}
+        --ip {{ hostonly_host_ip }} --netmask 255.255.255.0
+      changed_when: true
+
+    - name: Prerequis OK
+      ansible.builtin.debug:
+        msg: "Tout est en place : VBoxManage OK, ISO trouve, reseau {{ hostonly_network_name }} pret ({{ hostonly_host_ip }})."

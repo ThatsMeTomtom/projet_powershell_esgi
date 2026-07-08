@@ -1,0 +1,50 @@
+---
+# ====================================================================
+# 02-wait-winrm.yml
+# Attend que Windows ait fini son installation + FirstLogonCommands et
+# que WinRM reponde, puis fait un test de connexion (win_ping).
+# Necessite : collection ansible.windows + pip install pywinrm
+# (cf README-ansible.md)
+# ====================================================================
+- name: Attente de la VM et verification WinRM
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../vars/main.yml
+
+  tasks:
+    - name: Attente du port WinRM ({{ guest_static_ip }}:{{ winrm_port }})
+      ansible.builtin.wait_for:
+        host: "{{ guest_static_ip }}"
+        port: "{{ winrm_port }}"
+        timeout: "{{ winrm_wait_timeout_seconds }}"
+        delay: 30
+      register: winrm_ready
+
+    - name: Ajout dynamique de la VM a l'inventaire en memoire
+      ansible.builtin.add_host:
+        name: srv-win01
+        groups: windows
+        ansible_host: "{{ guest_static_ip }}"
+        ansible_connection: winrm
+        ansible_winrm_transport: ntlm
+        ansible_winrm_server_cert_validation: ignore
+        ansible_port: "{{ winrm_port }}"
+        ansible_user: "Administrateur"
+        ansible_password: "{{ admin_password }}"
+
+- name: Test de connexion WinRM
+  hosts: windows
+  gather_facts: false
+  tasks:
+    - name: win_ping
+      ansible.windows.win_ping:
+
+    - name: Informations systeme
+      ansible.windows.win_shell: "hostname; (Get-CimInstance Win32_OperatingSystem).Caption"
+      register: sysinfo
+
+    - name: Affichage
+      ansible.builtin.debug:
+        var: sysinfo.stdout_lines

@@ -1,0 +1,40 @@
+---
+# ====================================================================
+# 03-push-scripts.yml
+# Une fois WinRM confirme (02-wait-winrm.yml), copie les scripts
+# PowerShell deja livres (dossier windows/ + data/) sur la VM, au
+# meme endroit que vous utilisiez deja manuellement (C:\deploiement).
+#
+# La suite reste manuelle/interactive pour le script 01 (Install-ADDS-DNS
+# demande le mot de passe DSRM en saisie et redemarre le serveur - pas
+# adapte a une execution WinRM non-interactive). Une fois la promotion
+# DC faite et le serveur reconnecte, les scripts 02 a 12 peuvent etre
+# rejoues depuis Ansible (win_shell) ou a la main comme avant.
+# ====================================================================
+- name: Copie des scripts de deploiement sur SRV-WIN01
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+    - name: Creation de C:\deploiement
+      ansible.windows.win_file:
+        path: C:\deploiement
+        state: directory
+
+    - name: Copie du dossier windows\ (scripts PowerShell)
+      ansible.windows.win_copy:
+        src: ../../windows/
+        dest: C:\deploiement\windows\
+
+    - name: Copie du dossier data\ (CSV des utilisateurs)
+      ansible.windows.win_copy:
+        src: ../../data/
+        dest: C:\deploiement\data\
+
+    - name: Rappel de la suite
+      ansible.builtin.debug:
+        msg: >
+          Scripts copies dans C:\deploiement sur la VM. Connectez-vous
+          (console VirtualBox ou RDP) et lancez, DANS L'ORDRE :
+          01-Install-ADDS-DNS.ps1 (interactif, provoque un reboot),
+          puis reconnectez-vous et lancez 99-Deploy-All.ps1.

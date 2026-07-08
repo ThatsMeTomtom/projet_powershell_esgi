@@ -1,0 +1,111 @@
+---
+# ====================================================================
+# 01-create-vm.yml
+# Cree la VM dans VirtualBox, genere l'ISO autounattend.xml, attache
+# les 2 ISO (install + reponses) et demarre la VM.
+# Idempotent : relancer ce playbook ne recree pas une VM qui existe deja.
+# ====================================================================
+- name: Creation de la VM Windows Server 2022 dans VirtualBox
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../vars/main.yml
+
+  vars:
+    vboxmanage: "/mnt/c/Program Files/Oracle/VirtualBox/VBoxManage.exe"
+    work_dir_wsl: "{{ work_dir_win | regex_replace('^C:\\\\\\\\', '/mnt/c/') | regex_replace('\\\\\\\\', '/') }}"
+    vdi_path_win: "{{ work_dir_win }}\\{{ vm_name }}.vdi"
+    vdi_path_wsl: "{{ work_dir_wsl }}/{{ vm_name }}.vdi"
+    autounattend_iso_win: "{{ work_dir_win }}\\autounattend.iso"
+    autounattend_iso_wsl: "{{ work_dir_wsl }}/autounattend.iso"
+
+  tasks:
+
+    - name: Dossier de travail present ({{ work_dir_wsl }})
+      ansible.builtin.file:
+        path: "{{ work_dir_wsl }}"
+        state: directory
+        mode: "0755"
+
+    - name: Generation de autounattend.xml depuis le template
+      ansible.builtin.template:
+        src: ../files/autounattend.xml.j2
+        dest: "{{ work_dir_wsl }}/autounattend.xml"
+        mode: "0644"
+
+    - name: Construction du petit ISO autounattend.iso (genisoimage)
+      ansible.builtin.command: >
+        genisoimage -o "{{ autounattend_iso_wsl }}" -J -r -V "AUTOUNATTEND"
+        "{{ work_dir_wsl }}/autounattend.xml"
+      args:
+        creates: "{{ autounattend_iso_wsl }}"
+
+    - name: Liste des VM existantes
+      ansible.builtin.command: "\"{{ vboxmanage }}\" list vms"
+      register: existing_vms
+      changed_when: false
+
+    - name: La VM {{ vm_name }} n'existe pas encore
+      ansible.builtin.set_fact:
+        vm_exists: "{{ vm_name in existing_vms.stdout }}"
+
+    - name: Creation de la VM (createvm --register)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" createvm --name {{ vm_name }} --ostype {{ vm_os_type }} --register
+      when: not vm_exists
+
+    - name: Configuration RAM / CPU / reseau / boot
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" modifyvm {{ vm_name }}
+        --memory {{ vm_ram_mb }} --cpus {{ vm_cpus }}
+        --nic1 nat
+        --nic2 hostonly --hostonlyadapter2 {{ hostonly_network_name }}
+        --firmware bios
+        --boot1 dvd --boot2 disk --boot3 none --boot4 none
+      when: not vm_exists
+
+    - name: Creation du disque virtuel ({{ vm_disk_gb }} Go, dynamique)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" createmedium disk --filename "{{ vdi_path_win }}"
+        --size {{ vm_disk_gb * 1024 }} --format VDI
+      args:
+        creates: "{{ vdi_path_wsl }}"
+
+    - name: Ajout du controleur SATA
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" storagectl {{ vm_name }} --name "SATA Controller"
+        --add sata --controller IntelAhci --portcount 4
+      when: not vm_exists
+
+    - name: Attachement du disque dur virtuel (port 0)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" storageattach {{ vm_name }} --storagectl "SATA Controller"
+        --port 0 --device 0 --type hdd --medium "{{ vdi_path_win }}"
+      when: not vm_exists
+
+    - name: Attachement de l'ISO Windows Server (port 1, boot)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" storageattach {{ vm_name }} --storagectl "SATA Controller"
+        --port 1 --device 0 --type dvddrive --medium "{{ windows_iso_path_win }}"
+
+    - name: Attachement de l'ISO autounattend (port 2)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" storageattach {{ vm_name }} --storagectl "SATA Controller"
+        --port 2 --device 0 --type dvddrive --medium "{{ autounattend_iso_win }}"
+
+    - name: Etat actuel de la VM
+      ansible.builtin.command: "\"{{ vboxmanage }}\" showvminfo {{ vm_name }} --machinereadable"
+      register: vm_info
+      changed_when: false
+
+    - name: Demarrage de la VM (mode GUI, pour suivre l'installation a l'ecran)
+      ansible.builtin.command: "\"{{ vboxmanage }}\" startvm {{ vm_name }} --type gui"
+      when: "'VMState=\"running\"' not in vm_info.stdout"
+
+    - name: VM lancee
+      ansible.builtin.debug:
+        msg: >
+          VM {{ vm_name }} demarree. L'installation de Windows va se derouler
+          seule (fr-FR, edition index {{ image_index }}). Comptez 15-30 min,
+          puis enchainez avec 02-wait-winrm.yml.
