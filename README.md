@@ -6,10 +6,15 @@ Infrastructure multi-serveurs pour DHCP (Linux) et Active Directory (Windows).
 
 ```
 ├── linux/
-│   └── dhcp/                  # DHCP Server (Docker)
-│       ├── docker-compose.yml
-│       ├── dhcpd.conf
-│       ├── start.sh
+│   ├── dhcp/                  # DHCP Server (Docker)
+│   │   ├── docker-compose.yml
+│   │   ├── dhcpd.conf
+│   │   ├── start.sh
+│   │   └── README.md
+│   └── web/                   # Public + intranet websites (Docker)
+│       ├── docker-compose.yml # Port 80 exposed by reverse-proxy
+│       ├── nginx/
+│       ├── sites/
 │       └── README.md
 ├── windows/                   # Windows Server (PowerShell)
 │   ├── ad/                    # Active Directory setup
