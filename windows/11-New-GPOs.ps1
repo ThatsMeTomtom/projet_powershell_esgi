@@ -95,12 +95,12 @@ try {
     $gptContent = Get-Content $gptIniPath -ErrorAction Stop
     $versionLine = $gptContent | Where-Object { $_ -match '^Version=' }
     $currentVersion = [int](($versionLine -replace 'Version=', '').Trim())
-    $machineVersion = [math]::Floor($currentVersion / 65536)
-    $userVersion    = $currentVersion % 65536
-    $newVersion     = ($machineVersion * 65536) + ($userVersion + 1)
+    $machineVersion = [int][math]::Floor($currentVersion / 65536)
+    $userVersion    = [int]($currentVersion % 65536)
+    $newVersion     = [int](($machineVersion * 65536) + ($userVersion + 1))
     ($gptContent -replace '^Version=.*', "Version=$newVersion") | Set-Content $gptIniPath
     Set-ADObject -Identity "CN=$($gpoLogon.Id.ToString('B').ToUpper()),CN=Policies,CN=System,$DomainDN" `
-        -Replace @{versionNumber = $newVersion}
+        -Replace @{versionNumber = [int]$newVersion}
 } catch {
     Write-Warning "Mise a jour GPT.INI echouee : $_ (gpupdate /force sur les postes clients suffira)"
 }

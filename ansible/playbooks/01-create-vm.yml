@@ -74,6 +74,13 @@
         --boot1 dvd --boot2 disk --boot3 none --boot4 none
       when: not vm_exists
 
+    - name: Deregistrer le VDI si present dans le registre VirtualBox (cleanup relance)
+      ansible.builtin.command: >
+        "{{ vboxmanage }}" closemedium disk "{{ vdi_path_win }}"
+      failed_when: false
+      changed_when: false
+      when: not vm_exists
+
     - name: Creation du disque virtuel ({{ vm_disk_gb }} Go, dynamique)
       ansible.builtin.command: >
         "{{ vboxmanage }}" createmedium disk --filename "{{ vdi_path_win }}"

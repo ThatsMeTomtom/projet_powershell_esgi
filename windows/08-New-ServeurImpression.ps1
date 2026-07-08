@@ -23,7 +23,7 @@ function New-QueueIfMissing {
     param([string]$Name, [int]$Priority)
     if (-not (Get-Printer -Name $Name -ErrorAction SilentlyContinue)) {
         Add-Printer -Name $Name -DriverName $PrinterDriver -PortName $PrinterPort `
-            -Shared $true -ShareName $Name -Priority $Priority
+            -Shared -ShareName $Name -Priority $Priority
     }
     # Config par defaut : Noir & Blanc, recto-verso bord long
     Set-PrintConfiguration -PrinterName $Name -Color $false -DuplexingMode TwoSidedLongEdge -ErrorAction SilentlyContinue

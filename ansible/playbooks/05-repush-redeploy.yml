@@ -1,0 +1,35 @@
+---
+# Repousse les scripts corriges et relance 99-Deploy-All.ps1 sur la VM existante.
+# A utiliser quand la VM tourne deja avec AD configure (apres un echec de 99-Deploy-All).
+- name: Repousser les scripts et relancer le deploiement
+  hosts: windows_post_ad
+  gather_facts: false
+  vars_files:
+    - ../vars/main.yml
+    - ../vars/vault.yml
+
+  tasks:
+    - name: Copie du dossier windows\ (scripts corriges)
+      ansible.windows.win_copy:
+        src: ../../windows/
+        dest: C:\deploiement\windows\
+
+    - name: Copie du dossier data\
+      ansible.windows.win_copy:
+        src: ../../data/
+        dest: C:\deploiement\data\
+
+    - name: Lancement 99-Deploy-All.ps1
+      ansible.windows.win_shell: |
+        powershell.exe -ExecutionPolicy Bypass -File C:\deploiement\windows\99-Deploy-All.ps1
+      args:
+        chdir: C:\deploiement\windows
+      async: 1800
+      poll: 15
+      vars:
+        win_async_startup_timeout: 120
+      register: deploy_result
+
+    - name: Resultat
+      ansible.builtin.debug:
+        var: deploy_result.stdout_lines

@@ -33,8 +33,10 @@ if (-not (Get-DhcpServerv4ExclusionRange -ScopeId $scopeId -ErrorAction Silently
 }
 
 # Reservation statique du poste de test (pratique pour la demo, evite de re-chercher son bail)
-Add-DhcpServerv4Reservation -ScopeId $scopeId -IPAddress $ClientTestIP `
-    -ClientId "AA-BB-CC-DD-EE-FF" -Description "Poste de test demo (a adapter avec la vraie MAC)" `
-    -ErrorAction SilentlyContinue
+if (-not (Get-DhcpServerv4Reservation -ScopeId $scopeId -ErrorAction SilentlyContinue |
+        Where-Object { $_.IPAddress -eq $ClientTestIP })) {
+    Add-DhcpServerv4Reservation -ScopeId $scopeId -IPAddress $ClientTestIP `
+        -ClientId "AA-BB-CC-DD-EE-FF" -Description "Poste de test demo (a adapter avec la vraie MAC)"
+}
 
 Write-Host "Etendue DHCP $scopeId active. Plage Windows : $DhcpWinRangeStart-$DhcpWinRangeEnd (80%). Plage exclue/reservee au Linux : $DhcpLinuxRangeStart-$DhcpLinuxRangeEnd (20%)." -ForegroundColor Green
