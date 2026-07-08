@@ -11,16 +11,25 @@
   gather_facts: false
   vars_files:
     - ../vars/main.yml
+    - ../vars/vault.yml
 
   vars:
     vboxmanage: "/mnt/c/Program Files/Oracle/VirtualBox/VBoxManage.exe"
-    work_dir_wsl: "{{ work_dir_win | regex_replace('^C:\\\\\\\\', '/mnt/c/') | regex_replace('\\\\\\\\', '/') }}"
     vdi_path_win: "{{ work_dir_win }}\\{{ vm_name }}.vdi"
     vdi_path_wsl: "{{ work_dir_wsl }}/{{ vm_name }}.vdi"
     autounattend_iso_win: "{{ work_dir_win }}\\autounattend.iso"
     autounattend_iso_wsl: "{{ work_dir_wsl }}/autounattend.iso"
 
   tasks:
+
+    - name: Lire le nom reel de l'interface host-only
+      ansible.builtin.command: "cat {{ work_dir_wsl }}/hostonly_if_name.txt"
+      register: if_name_file
+      changed_when: false
+
+    - name: Fact nom interface
+      ansible.builtin.set_fact:
+        real_hostonly_name: "{{ if_name_file.stdout | trim }}"
 
     - name: Dossier de travail present ({{ work_dir_wsl }})
       ansible.builtin.file:
@@ -60,7 +69,7 @@
         "{{ vboxmanage }}" modifyvm {{ vm_name }}
         --memory {{ vm_ram_mb }} --cpus {{ vm_cpus }}
         --nic1 nat
-        --nic2 hostonly --hostonlyadapter2 {{ hostonly_network_name }}
+        --nic2 hostonly --hostonlyadapter2 "{{ real_hostonly_name }}"
         --firmware bios
         --boot1 dvd --boot2 disk --boot3 none --boot4 none
       when: not vm_exists

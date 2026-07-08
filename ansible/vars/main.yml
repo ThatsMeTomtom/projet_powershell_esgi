@@ -8,12 +8,14 @@ vm_cpus: 2
 vm_disk_gb: 60
 vm_os_type: "Windows2022_64"
 
-# ISO Windows Server 2022 fr-fr (chemin Windows, doubles antislashs)
-windows_iso_path_win: "C:\\LeChemin"
+# ISO Windows Server 2022 fr-fr
+windows_iso_path_win: "C:\\Users\\thomz\\Downloads\\SERVER_EVAL_x64FRE_fr-fr.iso"
+windows_iso_path_wsl: "/mnt/c/Users/thomz/Downloads/SERVER_EVAL_x64FRE_fr-fr.iso"
 image_index: 2  # 2 = Standard Desktop Experience (verifier avec Get-WindowsImage)
 
-# Dossier de travail cree sur C: (visible par VBoxManage et WSL via /mnt/c)
+# Dossier de travail
 work_dir_win: "C:\\AnsibleVM"
+work_dir_wsl: "/mnt/c/AnsibleVM"
 
 # Reseau host-only VirtualBox
 hostonly_network_name: "vboxnet0"

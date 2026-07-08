@@ -29,4 +29,14 @@ if ($DsmrPassword -ne "") {
 # 4) Promotion en controleur de domaine (nouvelle foret)
 Write-Host "Promotion en controleur de domaine : $DomainName" -ForegroundColor Cyan
 Install-ADDSForest `
-    -DomainName $Doma
+    -DomainName $DomainName `
+    -DomainNetbiosName $DomainNetBIOS `
+    -DomainMode WinThreshold `
+    -ForestMode WinThreshold `
+    -DatabasePath "C:\Windows\NTDS" `
+    -LogPath "C:\Windows\NTDS" `
+    -SysvolPath "C:\Windows\SYSVOL" `
+    -SafeModeAdministratorPassword $SafeModePwd `
+    -InstallDns:$true `
+    -NoRebootOnCompletion:$false `
+    -Force:$true

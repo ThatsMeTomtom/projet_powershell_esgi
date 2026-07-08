@@ -5,7 +5,7 @@ Install-WindowsFeature -Name FS-DFS-Namespace -IncludeManagementTools
 Import-Module DFSN
 
 # Partage racine dedie a l'espace de noms (dossier vide, uniquement un point d'entree)
-$dfsRootPath = "D:\DFSRoots\Partages"
+$dfsRootPath = "C:\DFSRoots\Partages"
 if (-not (Test-Path $dfsRootPath)) { New-Item -Path $dfsRootPath -ItemType Directory -Force | Out-Null }
 
 if (-not (Get-SmbShare -Name "Partages" -ErrorAction SilentlyContinue)) {

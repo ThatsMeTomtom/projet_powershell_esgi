@@ -10,6 +10,7 @@
   gather_facts: false
   vars_files:
     - ../vars/main.yml
+    - ../vars/vault.yml
 
   vars:
     # Chemin de VBoxManage.exe vu depuis WSL (installation par defaut)
@@ -32,40 +33,63 @@
 
     - name: L'ISO Windows existe bien a l'emplacement indique
       ansible.builtin.stat:
-        path: "{{ windows_iso_path_win | regex_replace('^C:\\\\\\\\', '/mnt/c/') | regex_replace('\\\\\\\\', '/') }}"
+        path: "{{ windows_iso_path_wsl }}"
       register: iso_stat
 
     - name: Echec si l'ISO est introuvable
       ansible.builtin.fail:
-        msg: >
-          ISO introuvable : {{ windows_iso_path_win }}. Verifiez le chemin
-          dans ansible/vars/main.yml (variable windows_iso_path_win).
+        msg: "ISO introuvable : {{ windows_iso_path_wsl }}. Verifiez windows_iso_path_wsl dans vars/main.yml."
       when: not iso_stat.stat.exists
 
-    - name: genisoimage est installe (pour graver autounattend.xml sur un mini ISO)
-      become: true
-      ansible.builtin.apt:
-        name: genisoimage
-        state: present
-        update_cache: true
+    - name: Verifier que genisoimage est installe
+      ansible.builtin.command: which genisoimage
+      changed_when: false
+      register: genisoimage_check
 
-    - name: Reseaux prives hote existants
+    - name: Echec si genisoimage manquant
+      ansible.builtin.fail:
+        msg: "genisoimage introuvable. Installez-le avec : sudo apt install genisoimage"
+      when: genisoimage_check.rc != 0
+
+    - name: Creer dossier de travail WSL
+      ansible.builtin.file:
+        path: "{{ work_dir_wsl }}"
+        state: directory
+        mode: "0755"
+
+    - name: Lister interfaces host-only existantes
       ansible.builtin.command: "\"{{ vboxmanage }}\" list hostonlyifs"
       register: hostonlyifs
       changed_when: false
 
-    - name: Creation du reseau prive hote {{ hostonly_network_name }} si absent
+    - name: Creer interface host-only si {{ hostonly_host_ip }} absente
       ansible.builtin.command: "\"{{ vboxmanage }}\" hostonlyif create"
-      when: hostonly_network_name not in hostonlyifs.stdout
+      when: hostonly_host_ip not in hostonlyifs.stdout
       register: created_hostonly
       changed_when: true
 
-    - name: Configuration IP du reseau prive hote ({{ hostonly_host_ip }})
+    - name: Re-lister pour obtenir le vrai nom Windows de l'interface
+      ansible.builtin.command: "\"{{ vboxmanage }}\" list hostonlyifs"
+      register: hostonlyifs_now
+      changed_when: false
+
+    - name: Extraire le nom de la premiere interface host-only
+      ansible.builtin.set_fact:
+        real_hostonly_name: "{{ hostonlyifs_now.stdout | regex_search('Name:\\s*(.+?)\\r?\\n', '\\1') | first | trim }}"
+
+    - name: Configurer IP {{ hostonly_host_ip }} sur {{ real_hostonly_name }}
       ansible.builtin.command: >
-        "{{ vboxmanage }}" hostonlyif ipconfig {{ hostonly_network_name }}
+        "{{ vboxmanage }}" hostonlyif ipconfig "{{ real_hostonly_name }}"
         --ip {{ hostonly_host_ip }} --netmask 255.255.255.0
+      when: hostonly_host_ip not in hostonlyifs.stdout
       changed_when: true
+
+    - name: Sauvegarder le nom de l'interface pour les playbooks suivants
+      ansible.builtin.copy:
+        content: "{{ real_hostonly_name }}"
+        dest: "{{ work_dir_wsl }}/hostonly_if_name.txt"
+        mode: "0644"
 
     - name: Prerequis OK
       ansible.builtin.debug:
-        msg: "Tout est en place : VBoxManage OK, ISO trouve, reseau {{ hostonly_network_name }} pret ({{ hostonly_host_ip }})."
+        msg: "VBoxManage OK, ISO trouve, interface '{{ real_hostonly_name }}' ({{ hostonly_host_ip }}) prete."

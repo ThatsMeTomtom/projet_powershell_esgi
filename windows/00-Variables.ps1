@@ -35,12 +35,12 @@ $Global:DhcpWinRangeEnd     = "10.15.0.250"
 $Global:DNSServers     = @($SrvWinIP)
 
 # --- Arborescence disque sur SRV-WIN01 --------------------------------------
-$Global:PartagesRoot   = "D:\Partages"
+$Global:PartagesRoot   = "C:\Partages"
 $Global:DirDirection   = "$PartagesRoot\Direction"
 $Global:DirEnseignants = "$PartagesRoot\Enseignants"
 $Global:DirClasses     = "$PartagesRoot\Classes"
-$Global:PersoRoot      = "D:\Perso"
-$Global:BackupDrive    = "E:"
+$Global:PersoRoot      = "C:\Perso"
+$Global:BackupDrive    = "E:"   # disque dedie en production ; si absent, 10-Sauvegarde l'indique proprement
 
 # --- Noms des groupes integres (DEPEND DE LA LANGUE DE L'ISO WINDOWS SERVER) --
 # Sur une version FR de Windows Server, Install-ADDSForest cree les groupes
@@ -48,8 +48,8 @@ $Global:BackupDrive    = "E:"
 # GUI qui est traduit, le SamAccountName reel change). Verifiez avec :
 #   Get-ADGroup -Filter * | Where-Object {$_.GroupScope -eq 'Global' -and $_.GroupCategory -eq 'Security'} | Select Name
 # et ajustez les 2 lignes ci-dessous si besoin (valeurs FR en commentaire).
-$Global:GrpDomainAdmins = "Domain Admins"   # FR : "Admins du domaine"
-$Global:GrpDomainUsers  = "Domain Users"    # FR : "Utilisateurs du domaine"
+$Global:GrpDomainAdmins = "Admins du domaine"
+$Global:GrpDomainUsers  = "Utilisateurs du domaine"
 
 # --- Comptes ------------------------------------------------------------
 # Mot de passe provisoire commun, changement OBLIGATOIRE a la 1ere connexion.

@@ -57,7 +57,7 @@ Set-GPRegistryValue -Guid $gpoRemote.Id `
     -ValueName "IPv4Filter" -Type String -Value "*" | Out-Null
 
 # Regles de pare-feu poussees directement dans la GPO (RDP 3389 + WinRM 5985)
-$gpoSession = Open-NetGPO -PolicyStore "$DomainNetBIOS\GPO-AccesDistant"
+$gpoSession = Open-NetGPO -PolicyStore "$DomainName\GPO-AccesDistant"
 New-NetFirewallRule -GPOSession $gpoSession -DisplayName "SNTS - Autoriser RDP" `
     -Direction Inbound -Protocol TCP -LocalPort 3389 -Action Allow -Profile Domain -ErrorAction SilentlyContinue
 New-NetFirewallRule -GPOSession $gpoSession -DisplayName "SNTS - Autoriser WinRM" `
@@ -91,17 +91,19 @@ $scriptsIniPath = "$sysvolGpoPath\User\Scripts\scripts.ini"
 # Increment de la version utilisateur dans GPT.INI (necessaire pour que les
 # clients detectent le changement au prochain gpupdate)
 $gptIniPath = "$sysvolGpoPath\GPT.INI"
-$gptContent = Get-Content $gptIniPath
-$versionLine = $gptContent | Where-Object { $_ -match '^Version=' }
-$currentVersion = [int]($versionLine -replace 'Version=', '')
-$machineVersion = [math]::Floor($currentVersion / 65536)
-$userVersion    = $currentVersion % 65536
-$newVersion     = ($machineVersion * 65536) + ($userVersion + 1)
-($gptContent -replace '^Version=.*', "Version=$newVersion") | Set-Content $gptIniPath
-
-# Synchro cote AD (attribut versionNumber du conteneur de la GPO)
-Set-ADObject -Identity "CN=$($gpoLogon.Id.ToString('B').ToUpper()),CN=Policies,CN=System,$DomainDN" `
-    -Replace @{versionNumber = $newVersion}
+try {
+    $gptContent = Get-Content $gptIniPath -ErrorAction Stop
+    $versionLine = $gptContent | Where-Object { $_ -match '^Version=' }
+    $currentVersion = [int](($versionLine -replace 'Version=', '').Trim())
+    $machineVersion = [math]::Floor($currentVersion / 65536)
+    $userVersion    = $currentVersion % 65536
+    $newVersion     = ($machineVersion * 65536) + ($userVersion + 1)
+    ($gptContent -replace '^Version=.*', "Version=$newVersion") | Set-Content $gptIniPath
+    Set-ADObject -Identity "CN=$($gpoLogon.Id.ToString('B').ToUpper()),CN=Policies,CN=System,$DomainDN" `
+        -Replace @{versionNumber = $newVersion}
+} catch {
+    Write-Warning "Mise a jour GPT.INI echouee : $_ (gpupdate /force sur les postes clients suffira)"
+}
 
 Write-Host "GPO terminees." -ForegroundColor Green
 Write-Host ""

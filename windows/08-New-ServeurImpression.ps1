@@ -26,7 +26,7 @@ function New-QueueIfMissing {
             -Shared $true -ShareName $Name -Priority $Priority
     }
     # Config par defaut : Noir & Blanc, recto-verso bord long
-    Set-PrintConfiguration -PrinterName $Name -Color $false -DuplexingMode TwoSidedLongEdge
+    Set-PrintConfiguration -PrinterName $Name -Color $false -DuplexingMode TwoSidedLongEdge -ErrorAction SilentlyContinue
 }
 
 New-QueueIfMissing -Name "Impr-Ecole-Staff"  -Priority 99
