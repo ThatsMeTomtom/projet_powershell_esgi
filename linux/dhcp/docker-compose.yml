@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  dhcp:
+    image: networkboot/dhcpd:latest
+    container_name: dhcp-server
+    network_mode: host
+    volumes:
+      - ./dhcpd.conf:/etc/dhcp/dhcpd.conf:ro
+      - dhcp-data:/var/lib/dhcp
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+
+volumes:
+  dhcp-data:
+    driver: local
