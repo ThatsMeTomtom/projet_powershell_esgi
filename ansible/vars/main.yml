@@ -1,53 +1,36 @@
 ---
-# ====================================================================
-# vars/main.yml - A ADAPTER avant de lancer quoi que ce soit
-# ====================================================================
+# vars/main.yml - Adapter avant de lancer
 
-# --- VM ---------------------------------------------------------------
+# VM VirtualBox
 vm_name: "SRV-WIN01"
 vm_ram_mb: 4096
 vm_cpus: 2
 vm_disk_gb: 60
-vm_os_type: "Windows2022_64"          # identifiant VBoxManage (voir `VBoxManage list ostypes`)
+vm_os_type: "Windows2022_64"
 
-# --- ISO Windows Server 2022 (fr-fr) -----------------------------------
-# CHEMIN WINDOWS (pas WSL) de l'ISO tel que vu depuis l'explorateur.
-# Exemple : "C:\\Users\\Enzo\\Downloads\\SERVER_EVAL_x64FRE_fr-fr.iso"
-windows_iso_path_win: "C:\\Users\\CHANGEZ_MOI\\Downloads\\SERVER_EVAL_x64FRE_fr-fr.iso"
+# ISO Windows Server 2022 fr-fr (chemin Windows, doubles antislashs)
+windows_iso_path_win: "C:\\LeChemin"
+image_index: 2  # 2 = Standard Desktop Experience (verifier avec Get-WindowsImage)
 
-# Index de l'edition dans le fichier install.wim de l'ISO.
-# Sur l'ISO d'evaluation Windows Server 2022 standard, l'ordre habituel est :
-#   1 = Standard (Server Core)   2 = Standard (Desktop Experience)
-#   3 = Datacenter (Server Core) 4 = Datacenter (Desktop Experience)
-# On prend la Standard avec interface graphique (2) pour garder ADUC/DNS/DHCP
-# en GUI pendant la demo. A VERIFIER en montant l'ISO sur Windows et en
-# lancant : Get-WindowsImage -ImagePath D:\sources\install.wim
-# (D: = lettre montee par l'explorateur). Si les index different, changez
-# la valeur ci-dessous.
-image_index: 2
-
-# --- Dossier de travail (fichiers generes : autounattend.xml + son ISO) --
-# Cree sur le disque C: du PC Windows (donc visible par VBoxManage.exe),
-# mais manipule depuis WSL via son equivalent /mnt/c/...
+# Dossier de travail cree sur C: (visible par VBoxManage et WSL via /mnt/c)
 work_dir_win: "C:\\AnsibleVM"
 
-# --- Reseau -------------------------------------------------------------
-# Reseau prive hote VirtualBox : permet PC hote <-> VM (et VM <-> VM si vous
-# ajoutez le serveur Linux / le client dessus plus tard). L'IP cote hote
-# devient la "passerelle" du reseau (10.15.0.1, coherent avec les scripts
-# PowerShell deja livres).
+# Reseau host-only VirtualBox
 hostonly_network_name: "vboxnet0"
 hostonly_host_ip: "10.15.0.1"
 guest_static_ip: "10.15.0.10"
 guest_prefix_length: 24
 
-# --- Windows --------------------------------------------------------------
+# Windows
 computer_name: "SRV-WIN01"
-# CHANGEZ ce mot de passe. Il sert de mot de passe Administrateur local
-# ET de mot de passe utilise par Ansible pour se connecter en WinRM.
-admin_password: "ChangeMoi2026!"
 locale: "fr-FR"
-timezone: "Romance Standard Time"     # Paris
+timezone: "Romance Standard Time"
 
+# Mots de passe (definis dans vault.yml, ne pas les mettre ici)
+admin_password: "{{ vault_admin_password }}"
+dsrm_password:  "{{ vault_dsrm_password }}"
+
+# WinRM
 winrm_port: 5985
-winrm_wait_timeout_seconds: 2700       # 45 min, large pour un 1er essai
+winrm_wait_timeout_seconds: 2700
+reboot_wait_seconds: 300

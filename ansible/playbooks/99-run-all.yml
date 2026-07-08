@@ -1,10 +1,7 @@
 ---
-# ====================================================================
-# 99-run-all.yml
-# Enchaine tout : prerequis -> creation VM -> attente WinRM -> copie
-# des scripts. Usage : ansible-playbook playbooks/99-run-all.yml
-# ====================================================================
+# Deploiement 1 clic : ansible-playbook playbooks/99-run-all.yml --ask-vault-pass
 - ansible.builtin.import_playbook: 00-check-prereqs.yml
 - ansible.builtin.import_playbook: 01-create-vm.yml
 - ansible.builtin.import_playbook: 02-wait-winrm.yml
 - ansible.builtin.import_playbook: 03-push-scripts.yml
+- ansible.builtin.import_playbook: 04-run-deployment.yml
