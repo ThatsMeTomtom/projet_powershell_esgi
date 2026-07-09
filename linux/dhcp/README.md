@@ -9,12 +9,13 @@ On a brand new Debian 13 server with SSH enabled and nothing else installed, run
 ```bash
 cd /opt
 sudo git clone <your-repo-url> projet_powershell_esgi
-cd projet_powershell_esgi/linux/dhcp
-bash install.sh
-bash start.sh
+cd projet_powershell_esgi/linux
+bash deploy.sh
 ```
 
-If Docker is already installed, you can skip `install.sh` and just run `bash start.sh`.
+This deploys both the DHCP server and the web stack in one command (see `linux/deploy.sh`).
+To deploy only the DHCP server, run `bash dhcp/start.sh` from `linux/` — it installs Docker
+automatically on first run via `install-docker.sh` if needed.
 
 ## Quick Start
 
