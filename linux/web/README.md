@@ -9,8 +9,13 @@ This Docker stack runs two websites on the Debian server:
 
 ```bash
 cd linux/web
-docker compose up -d
+bash start.sh
 ```
+
+This installs Docker automatically on first run (via `../install-docker.sh`) if needed,
+pulls the latest code, and starts the stack.
+
+To deploy DHCP and the web stack together in one command, run `bash linux/deploy.sh`.
 
 ## Stop
 

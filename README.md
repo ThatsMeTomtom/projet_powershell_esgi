@@ -25,18 +25,24 @@ Infrastructure multi-serveurs pour DHCP (Linux) et Active Directory (Windows).
 
 ## Démarrage Rapide
 
-### Linux DHCP Server
+### Linux (DHCP + Web) — déploiement en 1 clic
 
-Plug and play - pull and run:
+Depuis le serveur Debian où le dépôt a été cloné :
 
 ```bash
-# Option 1: Automated startup (pulls latest + starts)
-bash linux/dhcp/start.sh
+cd linux
+bash deploy.sh
+```
 
-# Option 2: Manual startup
-cd linux/dhcp
-git pull
-docker-compose up -d
+Ce script installe Docker si besoin, récupère la dernière version du code (`git pull`),
+puis démarre le serveur DHCP et le stack web (sites public + intranet). Idempotent :
+peut être relancé à tout moment pour redéployer les dernières modifications.
+
+Pour ne déployer qu'un seul des deux services :
+
+```bash
+bash linux/dhcp/start.sh   # DHCP uniquement
+bash linux/web/start.sh    # Web uniquement
 ```
 
 ### Windows Server — déploiement depuis Ansible (WSL2)
