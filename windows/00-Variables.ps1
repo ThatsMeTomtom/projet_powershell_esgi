@@ -11,7 +11,7 @@ $Global:PrefixLength   = 24
 $Global:SubnetMask     = "255.255.255.0"
 $Global:Gateway        = "10.15.0.1"
 
-$Global:SrvWinName     = "SRV-WIN01"
+$Global:SrvWinName     = $env:COMPUTERNAME
 $Global:SrvWinIP       = "10.15.0.10"
 $Global:SrvLinuxName   = "SRV-LNX01"
 $Global:SrvLinuxIP     = "10.15.0.11"
@@ -65,5 +65,8 @@ $Global:CsvUtilisateurs = Join-Path (Split-Path $PSScriptRoot -Parent) "data\Lou
 # --- Quota espace personnel P: -------------------------------------------
 $Global:QuotaPersoMo        = 1024   # 1 Go
 $Global:QuotaAlertPercent   = 90     # alerte a 90% (soit 10% restant)
+
+# Force tous les cmdlets AD a interroger le DC local (evite les echecs DNS apres reboot)
+$PSDefaultParameterValues['*-AD*:Server'] = 'localhost'
 
 Write-Host "Variables chargees pour l'ecole : $SchoolName ($DomainName)" -ForegroundColor Cyan

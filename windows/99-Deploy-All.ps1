@@ -1,4 +1,15 @@
 $ErrorActionPreference = "Stop"
+. "$PSScriptRoot\00-Variables.ps1"
+
+# Verification rapide que l'AD est operationnel avant de lancer les scripts
+try {
+    Get-ADDomain -Server localhost -ErrorAction Stop | Out-Null
+} catch {
+    Write-Host "Les services Active Directory ne sont pas encore prets." -ForegroundColor Red
+    Write-Host "Patientez quelques instants apres le redemarrage puis relancez ce script." -ForegroundColor Yellow
+    exit 1
+}
+
 $scripts = @(
     "02-New-OUsEtGroupes.ps1",
     "03-New-PasswordPolicies.ps1",
