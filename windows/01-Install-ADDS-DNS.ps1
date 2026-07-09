@@ -29,7 +29,6 @@ if ($DsmrPassword -ne "") {
 # 4) Promotion en controleur de domaine (nouvelle foret)
 Write-Host "Promotion en controleur de domaine : $DomainName" -ForegroundColor Cyan
 Install-ADDSForest `
-<<<<<<< HEAD
     -DomainName $DomainName `
     -DomainNetbiosName $DomainNetBIOS `
     -DomainMode WinThreshold `
@@ -41,6 +40,3 @@ Install-ADDSForest `
     -InstallDns:$true `
     -NoRebootOnCompletion:$false `
     -Force:$true
-=======
-    -DomainName $Doma
->>>>>>> 20f05ec (chore: nettoyage commentaires + vault Ansible)
