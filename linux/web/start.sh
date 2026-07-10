@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Linux DHCP Server Automation Script
-# Pull latest code and start/restart DHCP server
+# Linux Web Stack Automation Script
+# Pull latest code and start/restart the public + intranet websites
 
 set -euo pipefail
 
@@ -34,7 +34,7 @@ else
 fi
 
 echo "========================================="
-echo "Linux DHCP Server - Auto Startup"
+echo "Linux Web Stack - Auto Startup"
 echo "========================================="
 
 echo "[*] Pulling latest from git..."
@@ -43,28 +43,18 @@ git pull origin main 2>/dev/null || git pull origin master 2>/dev/null || echo "
 
 cd "$SCRIPT_DIR"
 
-echo "[*] Stopping previous DHCP container..."
+echo "[*] Stopping previous web containers..."
 "${DOCKER_SUDO[@]}" "${COMPOSE_CMD[@]}" down 2>/dev/null || true
 
-echo "[*] Starting DHCP server..."
+echo "[*] Starting web stack..."
 "${DOCKER_SUDO[@]}" "${COMPOSE_CMD[@]}" up -d
 
 echo "[*] Verifying container status..."
 "${DOCKER_SUDO[@]}" "${COMPOSE_CMD[@]}" ps
 
-sleep 3
-if ! "${DOCKER_SUDO[@]}" "${COMPOSE_CMD[@]}" ps --status running | grep -q dhcp-server; then
-  echo ""
-  echo "[!] Le conteneur dhcp-server ne reste pas actif (il redémarre en boucle)."
-  echo "[!] Cause fréquente : aucune interface réseau de cette machine n'a d'adresse IP"
-  echo "    dans le sous-réseau configuré (subnet 10.10.0.0/16 dans dhcpd.conf)."
-  echo "[!] Vérifiez les logs :"
-  echo "    ${DOCKER_SUDO[*]} ${COMPOSE_CMD[*]} logs dhcp"
-fi
-
 echo ""
 echo "========================================="
-echo "✓ DHCP Server is running"
+echo "✓ Web stack is running"
 echo "========================================="
 echo ""
 echo "View logs: ${DOCKER_SUDO[*]} ${COMPOSE_CMD[*]} -f $SCRIPT_DIR/docker-compose.yml logs -f"
